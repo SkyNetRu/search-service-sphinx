@@ -30,7 +30,7 @@ class Sphinx extends Controller
         $result = collect($result->fetchAllAssoc())->pluck('id');
 
         $itemsIds = Item::whereIn('id', $result)->get(['id']);
-        $itemsTitles = Item::whereIn('id', $result)->get(['id', 'title', 'title_rus'])->unique('title')->toArray();
+        $itemsTitles = Item::whereIn('id', $result)->distinct('title')->get(['title'])->toArray();
 
         return response()->json([
             'success' => true,
