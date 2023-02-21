@@ -12,7 +12,7 @@ use Foolz\SphinxQL\Drivers\Mysqli\Connection;
 
 class Sphinx extends Controller
 {
-    public function search (SearchRequest $request)
+    public function search(SearchRequest $request)
     {
         $conn = new Connection();
         $conn->setParams([
@@ -29,8 +29,12 @@ class Sphinx extends Controller
         $result = $query->execute();
         $result = collect($result->fetchAllAssoc())->pluck('id');
 
-        $items = Item::whereIn('id', $result)->get();
-        dump('search query - '.$request->search_string);
-        dd($items->pluck('title'));
+        $items = Item::whereIn('id', $result)->get()->pluck('id');
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation errors',
+            'data' => $items
+        ]);
     }
 }
