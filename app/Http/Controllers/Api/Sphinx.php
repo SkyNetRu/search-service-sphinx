@@ -29,11 +29,10 @@ class Sphinx extends Controller
         $result = $query->execute();
         $result = collect($result->fetchAllAssoc())->pluck('id');
 
-        $items = Item::whereIn('id', $result)->get()->pluck('id');
+        $items = Item::whereIn('id', $result)->get()->pluck('id', 'title', 'title_rus');
 
         return response()->json([
-            'success' => false,
-            'message' => 'Validation errors',
+            'success' => true,
             'data' => $items
         ]);
     }
