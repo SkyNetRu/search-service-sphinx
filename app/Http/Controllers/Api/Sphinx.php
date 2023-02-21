@@ -29,11 +29,15 @@ class Sphinx extends Controller
         $result = $query->execute();
         $result = collect($result->fetchAllAssoc())->pluck('id');
 
-        $items = Item::whereIn('id', $result)->get(['id', 'title', 'title_rus']);
+        $itemsIds = Item::whereIn('id', $result)->get(['id']);
+        $itemsTitles = Item::whereIn('id', $result)->groupBy('title')->get(['id', 'title', 'title_rus']);
 
         return response()->json([
             'success' => true,
-            'data' => $items
+            'data' => [
+                'items_ids' => $itemsIds,
+                'items_titles' => $itemsTitles
+            ]
         ]);
     }
 }
