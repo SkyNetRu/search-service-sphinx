@@ -16,7 +16,8 @@ class SearchRequest extends FormRequest
     public function rules()
     {
         return [
-            'search_string' => 'required|max:255'
+            'search_string' => 'required|max:255',
+            'catid' => 'required|integer',
         ];
 
     }
