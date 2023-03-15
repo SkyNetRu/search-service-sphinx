@@ -24,20 +24,17 @@ class Sphinx extends Controller
             ->from(config('database.connections.sphinx.database'))
             ->match(['title', 'title_rus', 'introtext', 'introtext_rus'], $request->search_string)
             ->where('sold', 0)
-            ->where('catid', $request->catid)
             ->where('published', 1);
 
         $result = $query->execute();
         $result = collect($result->fetchAllAssoc())->pluck('id');
 
-        $itemsIds = Item::whereIn('id', $result)->get(['id']);
-        $itemsTitles = Item::whereIn('id', $result)->distinct('title')->get(['title'])->toArray();
+        $itemsIds = Item::whereIn('id', $result)->where('catid', $request->catid)->get(['id']);
 
         return response()->json([
             'success' => true,
             'data' => [
-                'items_ids' => $itemsIds,
-                'items_titles' => $itemsTitles
+                'items_ids' => $itemsIds
             ]
         ]);
     }
