@@ -24,6 +24,7 @@ class Sphinx extends Controller
             ->from(config('database.connections.sphinx.database'))
             ->match(['title', 'title_rus', 'introtext', 'introtext_rus'], $request->search_string)
             ->where('sold', '=', 0)
+            ->where('catid', '=', $request->catid)
             ->where('published', '=', 1);
 
         $result = $query->execute();
