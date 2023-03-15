@@ -17,7 +17,7 @@ class SearchRequest extends FormRequest
     {
         return [
             'search_string' => 'required|max:255',
-            'catid' => 'required|integer',
+            'catid' => 'required',
         ];
 
     }
