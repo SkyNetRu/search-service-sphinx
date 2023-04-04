@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SearchRequest;
 use App\Models\Item;
+use App\Models\SearchLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Foolz\SphinxQL\SphinxQL;
@@ -29,6 +30,10 @@ class Sphinx extends Controller
         $result = collect($result->fetchAllAssoc())->pluck('id');
 
         $itemsIds = Item::whereIn('id', $result)->where('catid', $request->catid)->get(['id']);
+
+        $log = new SearchLog();
+        $log->seach_string = $request->search_string;
+        $log->save();
 
         return response()->json([
             'success' => true,

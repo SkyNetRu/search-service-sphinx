@@ -97,7 +97,6 @@ return [
             'driver'   => 'sphinx',
             'host'     => env('SPHINX_HOST', env('DB_HOST','127.0.0.1')),
             'port' => env('SPHINX_PORT', 9306),
-//            'database' => env('SPHINX_DATABASE', ''),
             'database' => env('SPHINX_DATABASE', ''),
         ],
 
