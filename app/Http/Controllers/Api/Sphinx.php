@@ -32,7 +32,7 @@ class Sphinx extends Controller
         $itemsIds = Item::whereIn('id', $result)->where('catid', $request->catid)->get(['id']);
 
         $log = new SearchLog();
-        $log->seach_string = $request->search_string;
+        $log->search_string = $request->search_string;
         $log->save();
 
         return response()->json([
