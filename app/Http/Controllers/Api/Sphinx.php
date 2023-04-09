@@ -50,7 +50,11 @@ class Sphinx extends Controller
             $aliasesIds = $query->get()->pluck('id')->toArray();
         }
 
-        $itemsIds = array_merge($itemsIds, $aliasesIds);
+        $likeItems = Item::where('title', 'like', '%'.$request->search_string.'%')->where('catid', $request->catid)
+            ->get()->pluck('id')->toArray();
+
+
+        $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems);
 
         $log = new SearchLog();
         $log->search_string = $request->search_string;
