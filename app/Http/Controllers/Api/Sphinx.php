@@ -44,11 +44,7 @@ class Sphinx extends Controller
             $aliasesIds = $query->get()->pluck('id')->toArray();
         }
 
-        dump($itemsIds);
-        dump($aliasesIds);
-
         $itemsIds = array_merge($itemsIds, $aliasesIds);
-        dd($itemsIds);
 
         $log = new SearchLog();
         $log->search_string = $request->search_string;
