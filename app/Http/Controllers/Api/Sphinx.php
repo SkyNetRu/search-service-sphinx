@@ -35,13 +35,13 @@ class Sphinx extends Controller
 
         $aliasWords = $this->aliasWords($request->search_string);
         if (count($aliasWords)) {
-            $query = Item::where(function (Builder $subQuery) use ($request, $aliasWords) {
+            $query = Item::where(function ($subQuery) use ($request, $aliasWords) {
                 $subQuery->where('catid', $request->catid)
                     ->where('title', 'like', '%' . $aliasWords[0] . '%');
             });
 
             for ($i = 1; $i < count($aliasWords); $i++) {
-                $query->orWhere(function (Builder $subQuery) use ($request, $aliasWords) {
+                $query->orWhere(function ($subQuery) use ($request, $aliasWords) {
                     $subQuery->where('catid', $request->catid)
                         ->where('title', 'like', '%' . $aliasWords[0] . '%');
                 });
