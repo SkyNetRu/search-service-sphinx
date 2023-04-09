@@ -30,6 +30,25 @@ class Sphinx extends Controller
         $result = collect($result->fetchAllAssoc())->pluck('id');
 
         $itemsIds = Item::whereIn('id', $result)->where('catid', $request->catid)->get(['id']);
+        $itemsIds = $itemsIds->pluck('id')->toArray();
+        $aliasesIds = [];
+
+        $aliasWords = $this->aliasWords($request->search_string);
+        if (count($aliasWords)) {
+            $query = Item::where('title', 'like', '%' . $aliasWords[0] . '%');
+
+            for ($i = 1; $i < count($aliasWords); $i++) {
+                $query->orWhere('title', 'like', '%' . $aliasWords[$i] . '%');
+            }
+
+            $aliasesIds = $query->get()->pluck('id')->toArray();
+        }
+
+        dump($itemsIds);
+        dump($aliasesIds);
+
+        $itemsIds = array_merge($itemsIds, $aliasesIds);
+        dd($itemsIds);
 
         $log = new SearchLog();
         $log->search_string = $request->search_string;
@@ -41,5 +60,18 @@ class Sphinx extends Controller
                 'items_ids' => $itemsIds
             ]
         ]);
+    }
+
+    public function aliasWords (string $serach_string)
+    {
+        foreach( config('word_alias.aliases') as $aliasWords ){
+            foreach( $aliasWords as $aliasWord ){
+                if ($serach_string == $aliasWord) {
+                    return $aliasWords;
+                }
+            }
+        }
+
+        return [];
     }
 }
