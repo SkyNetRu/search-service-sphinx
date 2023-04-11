@@ -140,7 +140,7 @@ class Sphinx extends Controller
         $alterOptionsIds = Item::whereIn('id', $result)->where('catid', $catid)->get(['id']);
         $alterOptionsIds = $alterOptionsIds->pluck('id')->toArray();
 
-        return $result;
+        return $alterOptionsIds;
     }
 
     public function getSearchWordsIds($search_string, $catid = 0) {
