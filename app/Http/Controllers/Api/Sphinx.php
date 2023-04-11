@@ -52,12 +52,12 @@ class Sphinx extends Controller
             'success' => true,
             'data' => [
                 'items_ids' => $totalIds,
-                'items_ids_test' => $itemsIds,
-                'alterOptionsId' => $alterOptionsId,
-                'likeItems' => $likeItems,
-                'searchWordsIds' => $searchWordsIds,
-                'aliasesIds' => $aliasesIds,
-                'spninxStringOptions' => $this->spninxStringOptions
+//                'items_ids_test' => $itemsIds,
+//                'alterOptionsId' => $alterOptionsId,
+//                'likeItems' => $likeItems,
+//                'searchWordsIds' => $searchWordsIds,
+//                'aliasesIds' => $aliasesIds,
+//                'spninxStringOptions' => $this->spninxStringOptions
             ]
         ]);
     }
