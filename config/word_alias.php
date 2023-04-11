@@ -2,8 +2,8 @@
 
 return [
     'aliases' => [
-        ['st', 'saint'],
-        ['bl', 'blessed'],
+        ['st', 'saint', 'st.'],
+        ['bl.', 'bl', 'blessed'],
         ['pantaleon', 'panteleimon'],
         ['bvm', 'the blessed virgin mary'],
         ['christ', 'jesus'],
@@ -14,7 +14,7 @@ return [
         ['protection', 'pokrov', 'veil'],
         ['iveron', 'iverskaya'],
         ['nicholas', 'nikolas', 'nikolaus', 'nick'],
-        ['ap.', 'apostle'],
+        ['ap', 'ap.', 'apostle'],
         ['savior', 'saviour', 'pantocrator'],
         ['wonderworker', 'wonder-worker', 'miracleworker', 'miracle-worker'],
         ['staurotheke', 'stavroteka'],

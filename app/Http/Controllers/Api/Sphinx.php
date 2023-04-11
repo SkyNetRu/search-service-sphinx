@@ -34,10 +34,18 @@ class Sphinx extends Controller
         $aliasesIds = [];
 
         $aliasWords = $this->aliasWords($request->search_string);
+        $search_words = explode(' ', str_replace('.', '', strtolower(trim($request->search_string))));
+        $searchWordsSql = implode('%', $search_words);
+
         if (count($aliasWords)) {
             $query = Item::where(function ($subQuery) use ($request, $aliasWords) {
                 $subQuery->where('catid', $request->catid)
                     ->where('title', 'like', '%' . $aliasWords[0] . '%');
+            });
+
+            $query->orWhere(function ($subQuery) use ($request, $searchWordsSql) {
+                $subQuery->where('catid', $request->catid)
+                    ->where('title', 'like', '%' . $searchWordsSql . '%');
             });
 
             for ($i = 1; $i < count($aliasWords); $i++) {
@@ -53,7 +61,6 @@ class Sphinx extends Controller
         $likeItems = Item::where('title', 'like', '%'.$request->search_string.'%')->where('catid', $request->catid)
             ->get()->pluck('id')->toArray();
 
-
         $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems);
 
         $log = new SearchLog();
@@ -68,11 +75,13 @@ class Sphinx extends Controller
         ]);
     }
 
-    public function aliasWords (string $serach_string)
+    public function aliasWords (string $search_string)
     {
+        $search_string = str_replace('.', '', strtolower(trim($search_string)));
+
         foreach( config('word_alias.aliases') as $aliasWords ){
             foreach( $aliasWords as $aliasWord ){
-                if ($serach_string == $aliasWord) {
+                if ($search_string == $aliasWord) {
                     return $aliasWords;
                 }
             }
