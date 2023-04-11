@@ -42,7 +42,7 @@ class Sphinx extends Controller
 
         $alterOptionsId = $this->alterOptionsSearch($request->search_string, $request->catid);
 
-        $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems, $searchWordsIds, $alterOptionsId);
+        $totalIds = array_merge($itemsIds, $aliasesIds, $likeItems, $searchWordsIds, $alterOptionsId);
 
         $log = new SearchLog();
         $log->search_string = $request->search_string;
@@ -51,7 +51,8 @@ class Sphinx extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'items_ids' => $itemsIds,
+                'items_ids' => $totalIds,
+                'items_ids_test' => $itemsIds,
                 'alterOptionsId' => $alterOptionsId,
                 'likeItems' => $likeItems,
                 'searchWordsIds' => $searchWordsIds,
