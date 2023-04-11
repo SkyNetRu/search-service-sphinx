@@ -34,8 +34,6 @@ class Sphinx extends Controller
         $aliasesIds = [];
 
         $aliasWords = $this->aliasWords($request->search_string);
-        $search_words = explode(' ', str_replace('.', '', strtolower(trim($request->search_string))));
-        $searchWordsSql = implode('%', $search_words);
 
         if (count($aliasWords)) {
             $query = Item::where(function ($subQuery) use ($request, $aliasWords) {
@@ -61,7 +59,15 @@ class Sphinx extends Controller
         $likeItems = Item::where('title', 'like', '%'.$request->search_string.'%')->where('catid', $request->catid)
             ->get()->pluck('id')->toArray();
 
-        $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems);
+
+        $search_words = explode(' ', str_replace('.', '', strtolower(trim($request->search_string))));
+        $searchWordsSql = implode('%', $search_words);
+        $searchWordsItems = Item::where(function ($subQuery) use ($request, $searchWordsSql) {
+            $subQuery->where('catid', $request->catid)
+                ->where('title', 'like', '%' . $searchWordsSql . '%');
+        })->get()->pluck('id')->toArray();
+
+        $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems, $searchWordsItems);
 
         $log = new SearchLog();
         $log->search_string = $request->search_string;
