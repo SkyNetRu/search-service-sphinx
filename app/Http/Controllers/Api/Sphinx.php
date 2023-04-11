@@ -144,6 +144,8 @@ class Sphinx extends Controller
                 ->where('published', 1);
             $query->match(['title', 'title_rus', 'introtext', 'introtext_rus'], $option);
             $result = $query->execute();
+            dump($result);
+            dd($result->fetchAllAssoc())->pluck('id');
             $result = collect($result->fetchAllAssoc())->pluck('id')->toArray();
 
             $alterOptionsIds = array_merge($alterOptionsIds, $result);
