@@ -31,43 +31,17 @@ class Sphinx extends Controller
 
         $itemsIds = Item::whereIn('id', $result)->where('catid', $request->catid)->get(['id']);
         $itemsIds = $itemsIds->pluck('id')->toArray();
-        $aliasesIds = [];
 
-        $aliasWords = $this->aliasWords($request->search_string);
-
-        if (count($aliasWords)) {
-            $query = Item::where(function ($subQuery) use ($request, $aliasWords) {
-                $subQuery->where('catid', $request->catid)
-                    ->where('title', 'like', '%' . $aliasWords[0] . '%');
-            });
-
-            $query->orWhere(function ($subQuery) use ($request, $searchWordsSql) {
-                $subQuery->where('catid', $request->catid)
-                    ->where('title', 'like', '%' . $searchWordsSql . '%');
-            });
-
-            for ($i = 1; $i < count($aliasWords); $i++) {
-                $query->orWhere(function ($subQuery) use ($request, $aliasWords) {
-                    $subQuery->where('catid', $request->catid)
-                        ->where('title', 'like', '%' . $aliasWords[0] . '%');
-                });
-            }
-
-            $aliasesIds = $query->get()->pluck('id')->toArray();
-        }
+        $aliasesIds = $this->aliasWords($request->search_string, $request->catid);
 
         $likeItems = Item::where('title', 'like', '%'.$request->search_string.'%')->where('catid', $request->catid)
             ->get()->pluck('id')->toArray();
 
+        $searchWordsIds = $this->getSearchWordsIds($request->search_string, $request->catid);
 
-        $search_words = explode(' ', str_replace('.', '', strtolower(trim($request->search_string))));
-        $searchWordsSql = implode('%', $search_words);
-        $searchWordsItems = Item::where(function ($subQuery) use ($request, $searchWordsSql) {
-            $subQuery->where('catid', $request->catid)
-                ->where('title', 'like', '%' . $searchWordsSql . '%');
-        })->get()->pluck('id')->toArray();
+        $alterOptionsId = $this->alterOptionsSearch($request->search_string);
 
-        $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems, $searchWordsItems);
+        $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems, $searchWordsIds, $alterOptionsId);
 
         $log = new SearchLog();
         $log->search_string = $request->search_string;
@@ -81,18 +55,98 @@ class Sphinx extends Controller
         ]);
     }
 
-    public function aliasWords (string $search_string)
+    public function aliasWords (string $search_string, $catid = 0)
     {
         $search_string = str_replace('.', '', strtolower(trim($search_string)));
+        $aliasWordsArr = $aliasesIds = [];
 
         foreach( config('word_alias.aliases') as $aliasWords ){
             foreach( $aliasWords as $aliasWord ){
                 if ($search_string == $aliasWord) {
-                    return $aliasWords;
+                    $aliasWordsArr = $aliasWords;
+                    break 2;
                 }
             }
         }
 
-        return [];
+        if (count($aliasWordsArr)) {
+            $query = Item::where(function ($subQuery) use ($catid, $aliasWordsArr) {
+                $subQuery->where('catid', $catid)
+                    ->where('title', 'like', '%' . $aliasWordsArr[0] . '%');
+            });
+
+            for ($i = 1; $i < count($aliasWords); $i++) {
+                $query->orWhere(function ($subQuery) use ($catid, $aliasWordsArr) {
+                    $subQuery->where('catid', $catid)
+                        ->where('title', 'like', '%' . $aliasWordsArr[0] . '%');
+                });
+            }
+
+            $aliasesIds = $query->get()->pluck('id')->toArray();
+        }
+
+        return $aliasesIds;
+    }
+
+    public function alterOptionsSearch ($search_string)
+    {
+        $search_words = explode(' ', str_replace('.', '', strtolower(trim($search_string))));
+
+
+        $spninxStringOptions = [];
+        $previousAliases = [];
+        foreach($search_words as $wkey =>  $word) {
+            $matchAliases = array_filter(config('word_alias.aliases'), function($alias) use ($word) {
+                return in_array($word, $alias);
+            });
+
+            $matchAliases = count($matchAliases) ? array_values($matchAliases)[0] : [$word];
+
+            foreach($matchAliases as $matchAlias) {
+                if (count($previousAliases)) {
+                    foreach($previousAliases as $previousAlias){
+                        $search_words_clone = $search_words;
+                        $search_words_clone[$wkey - 1] = $previousAlias;
+                        $search_words_clone[$wkey] = $matchAlias;
+                        $spninxStringOptions[] = implode(' ', $search_words_clone);
+                    }
+                } else {
+                    $search_words_clone = $search_words;
+                    $search_words_clone[$wkey] = $matchAlias;
+                    $spninxStringOptions[] = implode(' ', $search_words_clone);
+                }
+            }
+
+            $previousAliases = $matchAliases;
+        }
+
+        $conn = new Connection();
+        $conn->setParams([
+            'host' => config('database.connections.sphinx.host'),
+            'port' => config('database.connections.sphinx.port')
+        ]);
+
+        $query = (new SphinxQL($conn))->select('*')
+            ->from(config('database.connections.sphinx.database'))
+            ->where('published', 1);
+
+        foreach ($spninxStringOptions as $option) {
+            $query->match(['title', 'title_rus', 'introtext', 'introtext_rus'], $option)
+        }
+
+        $result = $query->execute();
+        $result = collect($result->fetchAllAssoc())->pluck('id');
+
+        return $result;
+    }
+
+    public function getSearchWordsIds($search_string, $catid = 0) {
+        $search_words = explode(' ', str_replace('.', '', strtolower(trim($search_string))));
+        $searchWordsSql = implode('%', $search_words);
+        return Item::where(function ($subQuery) use ($catid, $searchWordsSql) {
+            $subQuery->where('catid', $catid)
+                ->where('title', 'like', '%' . $searchWordsSql . '%');
+        })->get()->pluck('id')->toArray();
     }
 }
+
