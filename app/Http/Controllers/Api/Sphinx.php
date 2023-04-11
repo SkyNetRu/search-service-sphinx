@@ -50,7 +50,11 @@ class Sphinx extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'items_ids' => $itemsIds
+                'items_ids' => $itemsIds,
+                'alterOptionsId' => $alterOptionsId,
+                'likeItems' => $likeItems,
+                'searchWordsIds' => $searchWordsIds,
+                'aliasesIds' => $aliasesIds,
             ]
         ]);
     }
