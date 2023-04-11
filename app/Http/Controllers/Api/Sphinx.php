@@ -131,7 +131,7 @@ class Sphinx extends Controller
             ->where('published', 1);
 
         foreach ($spninxStringOptions as $option) {
-            $query->match(['title', 'title_rus', 'introtext', 'introtext_rus'], $option)
+            $query->match(['title', 'title_rus', 'introtext', 'introtext_rus'], $option);
         }
 
         $result = $query->execute();
