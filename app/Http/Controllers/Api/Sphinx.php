@@ -13,6 +13,7 @@ use Foolz\SphinxQL\Drivers\Mysqli\Connection;
 
 class Sphinx extends Controller
 {
+    public $spninxStringOptions = [];
     public function search(SearchRequest $request)
     {
         $conn = new Connection();
@@ -55,6 +56,7 @@ class Sphinx extends Controller
                 'likeItems' => $likeItems,
                 'searchWordsIds' => $searchWordsIds,
                 'aliasesIds' => $aliasesIds,
+                'spninxStringOptions' => $this->spninxStringOptions
             ]
         ]);
     }
@@ -123,6 +125,8 @@ class Sphinx extends Controller
 
             $previousAliases = $matchAliases;
         }
+
+        $this->spninxStringOptions = $spninxStringOptions;
 
         $conn = new Connection();
         $conn->setParams([
