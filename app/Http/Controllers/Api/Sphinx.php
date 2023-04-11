@@ -39,7 +39,7 @@ class Sphinx extends Controller
 
         $searchWordsIds = $this->getSearchWordsIds($request->search_string, $request->catid);
 
-        $alterOptionsId = $this->alterOptionsSearch($request->search_string);
+        $alterOptionsId = $this->alterOptionsSearch($request->search_string, $request->catid);
 
         $itemsIds = array_merge($itemsIds, $aliasesIds, $likeItems, $searchWordsIds, $alterOptionsId);
 
@@ -88,7 +88,7 @@ class Sphinx extends Controller
         return $aliasesIds;
     }
 
-    public function alterOptionsSearch ($search_string)
+    public function alterOptionsSearch ($search_string, $catid = 0)
     {
         $search_words = explode(' ', str_replace('.', '', strtolower(trim($search_string))));
 
@@ -136,6 +136,9 @@ class Sphinx extends Controller
 
         $result = $query->execute();
         $result = collect($result->fetchAllAssoc())->pluck('id');
+
+        $alterOptionsIds = Item::whereIn('id', $result)->where('catid', $catid)->get(['id']);
+        $alterOptionsIds = $alterOptionsIds->pluck('id')->toArray();
 
         return $result;
     }
