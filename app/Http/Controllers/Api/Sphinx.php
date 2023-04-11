@@ -135,19 +135,19 @@ class Sphinx extends Controller
             'port' => config('database.connections.sphinx.port')
         ]);
 
-        $query = (new SphinxQL($conn))->select('*')
-            ->from(config('database.connections.sphinx.database'))
-            ->where('published', 1);
 
+
+        $alterOptionsIds = [];
         foreach ($spninxStringOptions as $option) {
+            $query = (new SphinxQL($conn))->select('*')
+                ->from(config('database.connections.sphinx.database'))
+                ->where('published', 1);
             $query->match(['title', 'title_rus', 'introtext', 'introtext_rus'], $option);
+            $result = $query->execute();
+            $result = collect($result->fetchAllAssoc())->pluck('id')->toArray();
+
+            $alterOptionsIds = array_merge($alterOptionsIds, $result);
         }
-
-        $result = $query->execute();
-        $result = collect($result->fetchAllAssoc())->pluck('id');
-
-        $alterOptionsIds = Item::whereIn('id', $result)->where('catid', $catid)->get(['id']);
-        $alterOptionsIds = $alterOptionsIds->pluck('id')->toArray();
 
         return $alterOptionsIds;
     }
