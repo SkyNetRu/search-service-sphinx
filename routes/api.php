@@ -1,8 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\Sphinx;
 use App\Http\Controllers\Api\Heic;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Sphinx;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,4 +20,3 @@ use Illuminate\Support\Facades\Route;
 //});
 
 Route::get('search', [Sphinx::class, 'search']);
-Route::post('convert-heic-2-jpg', [Heic::class, 'convertHeic2Jpg']);
